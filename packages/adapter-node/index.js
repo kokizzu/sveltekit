@@ -7,7 +7,7 @@ import {
 	statSync,
 	writeFileSync
 } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { pipeline } from 'stream';
 import glob from 'tiny-glob';
 import { fileURLToPath } from 'url';
@@ -20,29 +20,20 @@ const pipe = promisify(pipeline);
  * @typedef {import('esbuild').BuildOptions} BuildOptions
  */
 
-/**
- * @param {{
- *   out?: string;
- *   precompress?: boolean;
- *   env?: {
- *     path?: string;
- *     host?: string;
- *     port?: string;
- *   };
- *   esbuild?: (defaultOptions: BuildOptions) => Promise<BuildOptions> | BuildOptions;
- * }} options
- */
+/** @type {import('.')} */
 export default function ({
+	entryPoint = '.svelte-kit/node/index.js',
 	out = 'build',
 	precompress,
 	env: { path: path_env = 'SOCKET_PATH', host: host_env = 'HOST', port: port_env = 'PORT' } = {},
-	esbuild: esbuildConfig
+	esbuild: esbuild_config
 } = {}) {
-	/** @type {import('@sveltejs/kit').Adapter} */
-	const adapter = {
+	return {
 		name: '@sveltejs/adapter-node',
 
 		async adapt({ utils, config }) {
+			utils.rimraf(out);
+
 			utils.log.minor('Copying assets');
 			const static_directory = join(out, 'assets');
 			utils.copy_client_files(static_directory);
@@ -53,7 +44,7 @@ export default function ({
 				await compress(static_directory);
 			}
 
-			utils.log.minor('Building server');
+			utils.log.minor('Building SvelteKit middleware');
 			const files = fileURLToPath(new URL('./files', import.meta.url));
 			utils.copy(files, '.svelte-kit/node');
 			writeFileSync(
@@ -62,12 +53,15 @@ export default function ({
 					path_env
 				)}] || false;\nexport const host = process.env[${JSON.stringify(
 					host_env
-				)}] || '0.0.0.0';\nexport const port = process.env[${JSON.stringify(port_env)}] || 3000;`
+				)}] || '0.0.0.0';\nexport const port = process.env[${JSON.stringify(
+					port_env
+				)}] || (!path && 3000);`
 			);
+
 			/** @type {BuildOptions} */
 			const defaultOptions = {
-				entryPoints: ['.svelte-kit/node/index.js'],
-				outfile: join(out, 'index.js'),
+				entryPoints: ['.svelte-kit/node/middlewares.js'],
+				outfile: join(out, 'middlewares.js'),
 				bundle: true,
 				external: Object.keys(JSON.parse(readFileSync('package.json', 'utf8')).dependencies || {}),
 				format: 'esm',
@@ -78,8 +72,40 @@ export default function ({
 					APP_DIR: `"/${config.kit.appDir}/"`
 				}
 			};
-			const buildOptions = esbuildConfig ? await esbuildConfig(defaultOptions) : defaultOptions;
-			await esbuild.build(buildOptions);
+			const build_options = esbuild_config ? await esbuild_config(defaultOptions) : defaultOptions;
+			await esbuild.build(build_options);
+
+			utils.log.minor('Building SvelteKit server');
+			/** @type {BuildOptions} */
+			const default_options_ref_server = {
+				entryPoints: [entryPoint],
+				outfile: join(out, 'index.js'),
+				bundle: true,
+				format: 'esm',
+				platform: 'node',
+				target: 'node12',
+				// external exclude workaround, see https://github.com/evanw/esbuild/issues/514
+				plugins: [
+					{
+						name: 'fix-middlewares-exclude',
+						setup(build) {
+							// Match an import of "middlewares.js" and mark it as external
+							const internal_middlewares_path = resolve('.svelte-kit/node/middlewares.js');
+							const build_middlewares_path = resolve(out, 'middlewares.js');
+							build.onResolve({ filter: /\/middlewares\.js$/ }, ({ path, resolveDir }) => {
+								const resolved = resolve(resolveDir, path);
+								if (resolved === internal_middlewares_path || resolved === build_middlewares_path) {
+									return { path: './middlewares.js', external: true };
+								}
+							});
+						}
+					}
+				]
+			};
+			const build_options_ref_server = esbuild_config
+				? await esbuild_config(default_options_ref_server)
+				: default_options_ref_server;
+			await esbuild.build(build_options_ref_server);
 
 			utils.log.minor('Prerendering static pages');
 			await utils.prerender({
@@ -91,8 +117,6 @@ export default function ({
 			}
 		}
 	};
-
-	return adapter;
 }
 
 /**
@@ -125,9 +149,7 @@ async function compress_file(file, format = 'gz') {
 						[zlib.constants.BROTLI_PARAM_SIZE_HINT]: statSync(file).size
 					}
 			  })
-			: zlib.createGzip({
-					level: zlib.constants.Z_BEST_COMPRESSION
-			  });
+			: zlib.createGzip({ level: zlib.constants.Z_BEST_COMPRESSION });
 
 	const source = createReadStream(file);
 	const destination = createWriteStream(`${file}.${format}`);

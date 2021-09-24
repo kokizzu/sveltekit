@@ -1,42 +1,49 @@
-import { InferValue, Location as Page, MaybePromise, Rec } from './helper';
+import { InferValue, MaybePromise, Rec } from './helper';
+
+export interface Page<Params extends Record<string, string> = Record<string, string>> {
+	host: string;
+	path: string;
+	params: Params;
+	query: URLSearchParams;
+}
 
 export interface LoadInput<
 	PageParams extends Rec<string> = Rec<string>,
-	Context extends Rec = Rec,
+	Stuff extends Rec = Rec,
 	Session = any
 > {
 	page: Page<PageParams>;
 	fetch(info: RequestInfo, init?: RequestInit): Promise<Response>;
 	session: Session;
-	context: Context;
+	stuff: Stuff;
 }
 
 export interface ErrorLoadInput<
 	PageParams extends Rec<string> = Rec<string>,
-	Context extends Rec = Rec,
+	Stuff extends Rec = Rec,
 	Session = any
-> extends LoadInput<PageParams, Context, Session> {
+> extends LoadInput<PageParams, Stuff, Session> {
 	status?: number;
 	error?: Error;
 }
 
-export interface LoadOutput<Props extends Rec = Rec, Context extends Rec = Rec> {
+export interface LoadOutput<Props extends Rec = Rec, Stuff extends Rec = Rec> {
 	status?: number;
 	error?: string | Error;
 	redirect?: string;
 	props?: Props;
-	context?: Context;
+	stuff?: Stuff;
 	maxage?: number;
 }
 
 interface LoadInputExtends {
-	context?: Rec;
+	stuff?: Rec;
 	pageParams?: Rec<string>;
 	session?: any;
 }
 
 interface LoadOutputExtends {
-	context?: Rec;
+	stuff?: Rec;
 	props?: Rec;
 }
 
@@ -47,12 +54,12 @@ export interface Load<
 	(
 		input: LoadInput<
 			InferValue<Input, 'pageParams', Rec<string>>,
-			InferValue<Input, 'context', Rec>,
+			InferValue<Input, 'stuff', Rec>,
 			InferValue<Input, 'session', any>
 		>
 	): MaybePromise<void | LoadOutput<
 		InferValue<Output, 'props', Rec>,
-		InferValue<Output, 'context', Rec>
+		InferValue<Output, 'stuff', Rec>
 	>>;
 }
 
@@ -63,10 +70,8 @@ export interface ErrorLoad<
 	(
 		input: ErrorLoadInput<
 			InferValue<Input, 'pageParams', Rec<string>>,
-			InferValue<Input, 'context', Rec>,
+			InferValue<Input, 'stuff', Rec>,
 			InferValue<Input, 'session', any>
 		>
-	): MaybePromise<LoadOutput<InferValue<Output, 'props', Rec>, InferValue<Output, 'context', Rec>>>;
+	): MaybePromise<LoadOutput<InferValue<Output, 'props', Rec>, InferValue<Output, 'stuff', Rec>>>;
 }
-
-export { Page };

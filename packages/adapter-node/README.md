@@ -27,6 +27,10 @@ export default {
 
 ## Options
 
+### entryPoint
+
+The server entry point. Allows you to provide a [custom server implementation](#middleware). Defaults to the provided reference server.
+
 ### out
 
 The directory to build the server to. It defaults to `build` — i.e. `node build` would start the server locally after it has been created.
@@ -44,6 +48,37 @@ HOST=127.0.0.1 PORT=4000 node build
 ```
 
 You can specify different environment variables if necessary using the `env` option.
+
+## Middleware
+
+The adapter exports a middleware `(req, res, next) => {}` that's compatible with [Express](https://github.com/expressjs/expressjs.com) / [Connect](https://github.com/senchalabs/connect) / [Polka](https://github.com/lukeed/polka). Additionally, it also exports a reference server implementation using this middleware with a plain Node HTTP server.
+
+But you can use your favorite server framework to combine it with other middleware and server logic. You can import `kitMiddleware`, your ready-to-use SvelteKit middleware from the `build` directory. You can use [the `entryPoint` option](#entryPoint) to bundle your custom server entry point.
+
+```js
+// src/server.js
+import { assetsMiddleware, prerenderedMiddleware, kitMiddleware } from '../build/middlewares.js';
+import polka from 'polka';
+
+const app = polka();
+
+const myMiddleware = function (req, res, next) {
+	console.log('Hello world!');
+	next();
+};
+
+app.use(myMiddleware);
+
+app.get('/no-svelte', (req, res) => {
+	res.end('This is not Svelte!');
+});
+
+app.use(assetsMiddleware, prerenderedMiddleware, kitMiddleware);
+
+app.listen(3000);
+```
+
+For using middleware in dev mode, [see the FAQ](https://kit.svelte.dev/faq#how-do-i-use-x-with-sveltekit-how-do-i-use-middleware).
 
 ## Advanced Configuration
 

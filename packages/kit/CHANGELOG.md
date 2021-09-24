@@ -1,5 +1,165 @@
 # @sveltejs/kit
 
+## 1.0.0-next.172
+
+### Patch Changes
+
+- [chore] upgrade to Svelte 3.43.0" ([#2474](https://github.com/sveltejs/kit/pull/2474))
+
+* **breaking change** the "context" parameter of the load function was renamed to "stuff" ([#2439](https://github.com/sveltejs/kit/pull/2439))
+
+## 1.0.0-next.171
+
+### Patch Changes
+
+- Fix preview when `kit.paths.base` is set. ([#2409](https://github.com/sveltejs/kit/pull/2409))
+
+* Resolve \$lib alias when packaging ([#2453](https://github.com/sveltejs/kit/pull/2453))
+
+## 1.0.0-next.170
+
+### Patch Changes
+
+- Fix prerendering/adapter-static failing when `kit.paths.base` was set. ([#2407](https://github.com/sveltejs/kit/pull/2407))
+
+## 1.0.0-next.169
+
+### Patch Changes
+
+- Add "svelte" field to package.json when running package command ([#2431](https://github.com/sveltejs/kit/pull/2431))
+
+* [fix] revert #2354 and fix double character decoding a different way ([#2435](https://github.com/sveltejs/kit/pull/2435))
+
+- [feat] use the Vite server options in dev mode ([#2232](https://github.com/sveltejs/kit/pull/2232))
+
+* update dependencies ([#2447](https://github.com/sveltejs/kit/pull/2447))
+
+## 1.0.0-next.168
+
+### Patch Changes
+
+- [fix] encodeURI during prerender ([#2427](https://github.com/sveltejs/kit/pull/2427))
+
+* [chore] add links to repository and homepage to package.json ([#2425](https://github.com/sveltejs/kit/pull/2425))
+
+## 1.0.0-next.167
+
+### Patch Changes
+
+- Update vite-plugin-svelte to 1.0.0-next.24 ([#2423](https://github.com/sveltejs/kit/pull/2423))
+
+* Add a generic argument to allow typing Body from hooks ([#2413](https://github.com/sveltejs/kit/pull/2413))
+
+## 1.0.0-next.166
+
+### Patch Changes
+
+- [chore] upgrade Vite to 2.5.7
+
+* [fix] deeply-nested error components render with correct layout ([#2389](https://github.com/sveltejs/kit/pull/2389))
+
+- Update vite-plugin-svelte to 1.0.0-next.23 ([#2402](https://github.com/sveltejs/kit/pull/2402))
+
+* [fix] pass along set-cookie headers during SSR ([#2362](https://github.com/sveltejs/kit/pull/2362))
+
+## 1.0.0-next.165
+
+### Patch Changes
+
+- [chore] upgrade Vite
+
+* [breaking] rename prerender.pages config option to prerender.entries ([#2380](https://github.com/sveltejs/kit/pull/2380))
+
+- [fix] anchor tag inside svg ([#2286](https://github.com/sveltejs/kit/pull/2286))
+
+## 1.0.0-next.164
+
+### Patch Changes
+
+- [fix] error components render with correct layout client-side as well as server-side ([#2378](https://github.com/sveltejs/kit/pull/2378))
+
+* refactor `import.meta.env` usage in `$app/stores.js` to use `$app/env.js` to DRY code and make mocking easier ([#2353](https://github.com/sveltejs/kit/pull/2353))
+
+- Trim `.js` extensions in package exports field ([#2345](https://github.com/sveltejs/kit/pull/2345))
+
+## 1.0.0-next.163
+
+### Patch Changes
+
+- Update vite-plugin-svelte to 1.0.0-next.22 ([#2370](https://github.com/sveltejs/kit/pull/2370))
+
+* [fix] load function should not leak props to other components ([#2356](https://github.com/sveltejs/kit/pull/2356))
+
+- packaging merge exports field by default ([#2327](https://github.com/sveltejs/kit/pull/2327))
+
+* [fix] don't decode URL when finding matching route ([#2354](https://github.com/sveltejs/kit/pull/2354))
+
+## 1.0.0-next.162
+
+### Patch Changes
+
+- Enable nested dependency optimization by updating to @sveltejs/vite-plugin-svelte@1.0.0-next.21 ([#2343](https://github.com/sveltejs/kit/pull/2343))
+
+## 1.0.0-next.161
+
+### Patch Changes
+
+- Allow service workers to access files using the \$lib alias ([#2326](https://github.com/sveltejs/kit/pull/2326))
+
+* [fix] remove Vite workaround now that dev deps can be bundled ([#2340](https://github.com/sveltejs/kit/pull/2340))
+
+- support using arrays for kit.vite.resolve.alias ([#2328](https://github.com/sveltejs/kit/pull/2328))
+
+## 1.0.0-next.160
+
+### Patch Changes
+
+- [fix] upgrade to Vite 2.5.2 to fix URL decoding ([#2323](https://github.com/sveltejs/kit/pull/2323))
+
+* Add `@sveltejs/kit` to `noExternal` in dev server as well ([#2332](https://github.com/sveltejs/kit/pull/2332))
+
+## 1.0.0-next.159
+
+### Patch Changes
+
+- Add `@sveltejs/kit` to noExternal to resolve hooks module in dev server ([#2306](https://github.com/sveltejs/kit/pull/2306))
+
+* [fix] HMR on Windows ([#2315](https://github.com/sveltejs/kit/pull/2315))
+
+## 1.0.0-next.158
+
+### Patch Changes
+
+- avoid setting rawBody/body to an empty Uint8Array when a load's fetch function is called with no body during SSR ([#2295](https://github.com/sveltejs/kit/pull/2295))
+
+## 1.0.0-next.157
+
+### Patch Changes
+
+- [chore] separate RequestHeaders and ResponseHeaders types ([#2248](https://github.com/sveltejs/kit/pull/2248))
+
+* [fix] don't de-indent user-rendered HTML ([#2292](https://github.com/sveltejs/kit/pull/2292))
+
+## 1.0.0-next.156
+
+### Patch Changes
+
+- allow any top-level keys in svelte config ([#2267](https://github.com/sveltejs/kit/pull/2267))
+
+* Exclude emitted declarations on packaging ([#2247](https://github.com/sveltejs/kit/pull/2247))
+
+## 1.0.0-next.155
+
+### Patch Changes
+
+- [chore] export App types ([#2259](https://github.com/sveltejs/kit/pull/2259))
+
+## 1.0.0-next.154
+
+### Patch Changes
+
+- Upgrade to Vite 2.5.0 ([#2231](https://github.com/sveltejs/kit/pull/2231))
+
 ## 1.0.0-next.153
 
 ### Patch Changes

@@ -1,7 +1,10 @@
 import { join } from 'path';
-import { test } from 'uvu';
-import * as assert from 'uvu/assert';
 import { fileURLToPath } from 'url';
+
+import * as assert from 'uvu/assert';
+import { test } from 'uvu';
+
+import { remove_keys } from '../../../utils/object.js';
 import { load_config } from '../index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,12 +17,9 @@ async function testLoadDefaultConfig(path) {
 	const cwd = join(__dirname, 'fixtures', path);
 
 	const config = await load_config({ cwd });
-
-	// @ts-expect-error - can't test equality of a function
-	delete config.kit.vite;
+	remove_keys(config, ([, v]) => typeof v === 'function');
 
 	assert.equal(config, {
-		compilerOptions: null,
 		extensions: ['.svelte'],
 		kit: {
 			adapter: null,
@@ -39,27 +39,23 @@ async function testLoadDefaultConfig(path) {
 			hydrate: true,
 			package: {
 				dir: 'package',
-				exports: {
-					include: ['**'],
-					exclude: ['_*', '**/_*']
-				},
-				files: {
-					include: ['**'],
-					exclude: []
-				},
 				emitTypes: true
 			},
-			serviceWorker: {
-				exclude: []
-			},
+			serviceWorker: {},
 			paths: { base: '', assets: '' },
-			prerender: { crawl: true, enabled: true, force: undefined, onError: 'fail', pages: ['*'] },
+			prerender: {
+				crawl: true,
+				enabled: true,
+				entries: ['*'],
+				force: undefined,
+				onError: 'fail',
+				pages: undefined
+			},
 			router: true,
 			ssr: true,
 			target: null,
 			trailingSlash: 'never'
-		},
-		preprocess: null
+		}
 	});
 }
 
@@ -71,27 +67,12 @@ test('load default config (esm)', async () => {
 	await testLoadDefaultConfig('default-esm');
 });
 
-test('errors on loading config without default export', async () => {
-	let errorMessage = null;
-	try {
-		const cwd = join(__dirname, 'fixtures', 'export-missing');
-		await load_config({ cwd });
-	} catch (e) {
-		errorMessage = e.message;
-	}
-
-	assert.equal(
-		errorMessage,
-		'Your config is missing default exports. Make sure to include "export default config;"'
-	);
-});
-
 test('errors on loading config with incorrect default export', async () => {
 	let errorMessage = null;
 	try {
 		const cwd = join(__dirname, 'fixtures', 'export-string');
 		await load_config({ cwd });
-	} catch (e) {
+	} catch (/** @type {any} */ e) {
 		errorMessage = e.message;
 	}
 

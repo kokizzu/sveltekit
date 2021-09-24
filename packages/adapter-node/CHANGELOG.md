@@ -1,5 +1,53 @@
 # @sveltejs/adapter-node
 
+## 1.0.0-next.50
+
+### Patch Changes
+
+- [fix] Correctly treat `middlewares.js` as external when using `entryPoint` option ([#2482](https://github.com/sveltejs/kit/pull/2482))
+
+## 1.0.0-next.49
+
+### Patch Changes
+
+- update dependencies ([#2447](https://github.com/sveltejs/kit/pull/2447))
+
+## 1.0.0-next.48
+
+### Patch Changes
+
+- [chore] add links to repository and homepage to package.json ([#2425](https://github.com/sveltejs/kit/pull/2425))
+
+## 1.0.0-next.47
+
+### Patch Changes
+
+- [feat] add entryPoint option for custom servers ([#2414](https://github.com/sveltejs/kit/pull/2414))
+
+## 1.0.0-next.46
+
+### Patch Changes
+
+- Clear output directory before adapting ([#2388](https://github.com/sveltejs/kit/pull/2388))
+
+## 1.0.0-next.45
+
+### Patch Changes
+
+- [chore] export package.json from adapters ([#2351](https://github.com/sveltejs/kit/pull/2351))
+
+## 1.0.0-next.44
+
+### Patch Changes
+
+- [feat] expose handler to allow use in custom server
+
+## 1.0.0-next.43
+
+### Patch Changes
+
+- [fix] provide default port only if path not provided ([#2244](https://github.com/sveltejs/kit/pull/2244))
+
 ## 1.0.0-next.42
 
 ### Patch Changes

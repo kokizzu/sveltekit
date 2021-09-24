@@ -4,14 +4,11 @@ import { render_response } from './page/render.js';
 import { respond_with_error } from './page/respond_with_error.js';
 import { parse_body } from './parse_body/index.js';
 import { lowercase_keys } from './utils.js';
-import { coalesce_to_error } from '../utils.js';
 import { hash } from '../hash.js';
+import { get_single_valued_header } from '../../utils/http.js';
+import { coalesce_to_error } from '../../utils/error.js';
 
-/**
- * @param {import('types/internal').Incoming} incoming
- * @param {import('types/internal').SSRRenderOptions} options
- * @param {import('types/internal').SSRRenderState} [state]
- */
+/** @type {import('@sveltejs/kit/ssr').Respond} */
 export async function respond(incoming, options, state = {}) {
 	if (incoming.path !== '/' && options.trailing_slash !== 'ignore') {
 		const has_trailing_slash = incoming.path.endsWith('/');
@@ -70,7 +67,8 @@ export async function respond(incoming, options, state = {}) {
 					if (response) {
 						// inject ETags for 200 responses
 						if (response.status === 200) {
-							if (!/(no-store|immutable)/.test(response.headers['cache-control'])) {
+							const cache_control = get_single_valued_header(response.headers, 'cache-control');
+							if (!cache_control || !/(no-store|immutable)/.test(cache_control)) {
 								const etag = `"${hash(response.body || '')}"`;
 
 								if (request.headers['if-none-match'] === etag) {

@@ -1,25 +1,15 @@
 import { RequestHandler } from './endpoint';
-import { Headers, Location, ParameterizedBody } from './helper';
 import {
 	ExternalFetch,
 	GetSession,
 	Handle,
 	HandleError,
-	RawBody,
 	ServerRequest,
-	ServerResponse,
-	StrictBody
+	ServerResponse
 } from './hooks';
 import { Load } from './page';
 
 type PageId = string;
-
-export interface Incoming extends Omit<Location, 'params'> {
-	method: string;
-	headers: Headers;
-	rawBody: RawBody;
-	body?: ParameterizedBody;
-}
 
 export interface Logger {
 	(msg: string): void;
@@ -30,31 +20,6 @@ export interface Logger {
 	info(msg: string): void;
 }
 
-export interface App {
-	init({
-		paths,
-		prerendering,
-		read
-	}: {
-		paths: {
-			base: string;
-			assets: string;
-		};
-		prerendering: boolean;
-		read(file: string): Buffer;
-	}): void;
-	render(
-		incoming: Incoming,
-		options?: {
-			prerender: {
-				fallback?: string;
-				all: boolean;
-				dependencies?: Map<string, ServerResponse>;
-			};
-		}
-	): Promise<ServerResponse>;
-}
-
 export interface SSRComponent {
 	ssr?: boolean;
 	router?: boolean;
@@ -63,9 +28,7 @@ export interface SSRComponent {
 	preload?: any; // TODO remove for 1.0
 	load: Load;
 	default: {
-		render(
-			props: Record<string, any>
-		): {
+		render(props: Record<string, any>): {
 			html: string;
 			head: string;
 			css: {
@@ -229,7 +192,7 @@ export interface NormalizedLoadOutput {
 	error?: Error;
 	redirect?: string;
 	props?: Record<string, any> | Promise<Record<string, any>>;
-	context?: Record<string, any>;
+	stuff?: Record<string, any>;
 	maxage?: number;
 }
 

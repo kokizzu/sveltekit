@@ -1,5 +1,3 @@
-import { RawBody } from './hooks';
-
 interface ReadOnlyFormData {
 	get(key: string): string;
 	getAll(key: string): string[];
@@ -10,24 +8,22 @@ interface ReadOnlyFormData {
 	[Symbol.iterator](): Generator<[string, string], void>;
 }
 
-type BaseBody = string | RawBody | ReadOnlyFormData;
-export type ParameterizedBody<Body = unknown> = Body extends FormData
-	? ReadOnlyFormData
-	: BaseBody & Body;
+type ToJSON = { toJSON(...args: any[]): JSONValue };
+type JSONValue = Exclude<JSONString, ToJSON>;
+export type JSONString =
+	| string
+	| number
+	| boolean
+	| null
+	| ToJSON
+	| JSONString[]
+	| { [key: string]: JSONString };
 
-// TODO we want to differentiate between request headers, which
-// always follow this type, and response headers, in which
-// 'set-cookie' is a `string[]` (or at least `string | string[]`)
-// but this can't happen until TypeScript 4.3
-export type Headers = Record<string, string>;
+/** `string[]` is only for set-cookie, everything else must be type of `string` */
+export type ResponseHeaders = Record<string, string | string[]>;
+export type RequestHeaders = Record<string, string>;
 
-export type Location<Params extends Record<string, string> = Record<string, string>> = {
-	host: string;
-	path: string;
-	params: Params;
-	query: URLSearchParams;
-};
-
+// Utility Types
 export type InferValue<T, Key extends keyof T, Default> = T extends Record<Key, infer Val>
 	? Val
 	: Default;
@@ -35,12 +31,11 @@ export type MaybePromise<T> = T | Promise<T>;
 export type Rec<T = any> = Record<string, T>;
 export type RecursiveRequired<T> = {
 	// Recursive implementation of TypeScript's Required utility type.
-	// will continue until it reaches a primitive or union
-	// with a Function in it, except for the 'vite' key
-	// which we want the end result to be just a function
-	[K in keyof T]-?: Extract<T[K], Function> extends never
-		? RecursiveRequired<T[K]>
-		: K extends 'vite'
-		? Extract<T[K], Function>
-		: T[K];
+	// Will recursively continue until it reaches primitive or union
+	// with a Function in it, except those commented below
+	[K in keyof T]-?: Extract<T[K], Function> extends never // If it does not have a Function type
+		? RecursiveRequired<T[K]> // recursively continue through.
+		: K extends 'vite' // If it reaches the 'vite' key
+		? Extract<T[K], Function> // only take the Function type.
+		: T[K]; // Use the exact type for everything else
 };
